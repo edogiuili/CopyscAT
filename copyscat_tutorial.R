@@ -43,7 +43,6 @@ setOutputFile("~","samp_dataset")
 scData<-scDataSamp
 scData_k_norm <- normalizeMatrixN(scData,logNorm = FALSE,maxZero=2000,imputeZeros = FALSE,blacklistProp = 0.8,blacklistCutoff=125,dividingFactor=1,upperFilterQuantile = 0.95)
 #when using your own data, please make sure you don't have any excess / alt chromosomes
-
 #collapse into chromosome arm level
 summaryFunction<-cutAverage
 scData_collapse<-collapseChrom3N(scData_k_norm,summaryFunction=summaryFunction,binExpand = 1,minimumChromValue = 100,logTrans = FALSE,tssEnrich = 1,logBase=2,minCPG=300,powVal=0.73) 

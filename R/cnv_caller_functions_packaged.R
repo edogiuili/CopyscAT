@@ -2176,7 +2176,8 @@ generateReferences <- function(genomeObject,genomeText="hg38",tileWidth=1e6,outp
   #a<-tile(chroms,width=1e6)
   #tile the genome
   tiles<-tileGenome(seqlengths(chroms),tilewidth=tileWidth,cut.last.tile.in.chrom=T)
-  print(tiles)
+  #remove excess chroms
+  tiles<-keepStandardChromosomes(tiles,pruning.mode = "tidy")
   tbl.cytobands<-GRanges()
   tbl.cpgIslandExt<-GRanges()
   seqInfo<-SeqinfoForUCSCGenome(genomeText)
@@ -2204,16 +2205,17 @@ generateReferences <- function(genomeObject,genomeText="hg38",tileWidth=1e6,outp
   {
     mySession = browserSession("UCSC")
     genome(mySession) <- genomeText
-    tbl.cytobands <- getTable(
-      ucscTableQuery(mySession, track="cytoBand",
-                     table="cytoBand"))
-    tbl.cpgIslandExt <- getTable(
-      ucscTableQuery(mySession, track="cpgIslandExtUnmasked",
-                     table="cpgIslandExtUnmasked"))
-    tbl.cytobands<-GRanges(tbl.cytobands)
-    tbl.cpgIslandExt<-GRanges(tbl.cpgIslandExt)
+    tbl.cytobands <- keepStandardChromosomes(track(
+      ucscTableQuery(mySession, table="cytoBand")),pruning.mode = "tidy")
+    tbl.cpgIslandExt <- keepStandardChromosomes(track(
+      ucscTableQuery(mySession, table="cpgIslandExtUnmasked")),pruning.mode = "tidy")
   }
-  tbl.cytobands
+  #sort seqlevels on cytobands
+  seqlevels(tbl.cytobands) <- sortSeqlevels(seqlevels(tbl.cytobands))
+  tbl.cytobands <- sort.GenomicRanges(tbl.cytobands)
+  tbl.cpgIslandExt <- sort.GenomicRanges(tbl.cpgIslandExt)
+  #sort cytoband list
+  
   # print(tbl.cytobands)
   #now intersect these to generate the reference files
   #http://web.mit.edu/~r/current/arch/i386_linux26/lib/R/library/GenomicRanges/html/findOverlaps-methods.html
@@ -2221,7 +2223,6 @@ generateReferences <- function(genomeObject,genomeText="hg38",tileWidth=1e6,outp
   centromeres<-which(mcols(tbl.cytobands)$gieStain=="acen")
   mcols(tbl.cytobands)$name[centromeres]<-"cen"
   mcols(tbl.cytobands)$gieStain<-NULL
-  print(tbl.cytobands$name)
   tbl.cytobands$name<-as.character(tbl.cytobands$name)
   #pad names
   #print(which(tbl.cytobands$name==""))
@@ -2233,7 +2234,9 @@ generateReferences <- function(genomeObject,genomeText="hg38",tileWidth=1e6,outp
   # subjectHits(matches)
   # print(tiles)
   # print(a3)
-  
+  #sort matches
+  matches2 = matches[order(queryHits(matches))]
+  #print(matches2)
   #print(tbl.cytobands[queryHits(matches)])
   #tbl.cytobands
   mcols(a3) <- cbind.data.frame(
@@ -2249,9 +2252,8 @@ generateReferences <- function(genomeObject,genomeText="hg38",tileWidth=1e6,outp
   mcols(empties)<-cbind.data.frame(mcols(empties),name="p")
   a3<-sort.GenomicRanges(append(GRanges(a3),empties))
   a3<-unique(a3)
-  
   #add empties to zero (cpgNum = 0)
-  
+  print(a3)
   #a3<-sort.GenomicRanges(append(GRanges(a3),empties))
   
   #overlap stuff again to remove doubles
@@ -2263,18 +2265,17 @@ generateReferences <- function(genomeObject,genomeText="hg38",tileWidth=1e6,outp
   #sum up the stuff
   #https://www.rdocumentation.org/packages/S4Vectors/versions/0.4.0/topics/Hits-class
   b1<-tbl.cpgIslandExt[subjectHits(matches)]
-  mcols(b1) <- cbind.data.frame(
-    mcols(b1),
-    ranges(tiles[queryHits(matches)]),
-    chrom(tiles[queryHits(matches)]))
   
-  
+  b1_df <- cbind.data.frame(
+    data.frame(mcols(b1)),
+    data.frame(tiles=ranges(tiles[queryHits(matches)])),
+    chromMatch=chrom(tiles[queryHits(matches)]))
   #NEED TO FIND TILES THAT AREN'T MATCHES
   length(unique(queryHits(matches)))
   #
-  b1t<-as_tibble(b1)
+  b1t<-as_tibble(b1_df)
   #subjectHits vs queryHits
-  b1t<-b1t %>% mutate(interval=str_c(chrom.tiles.queryHits.matches...,start.1,end.1,sep="-"))
+  b1t<-b1t %>% mutate(interval=str_c(chromMatch,tiles.start,tiles.end,sep="-"))
   b1t$interval
   b1t2<-b1t %>% group_by(interval) %>% summarise_at(vars(cpgNum),sum) %>% separate(interval,into=c("chrom","start","end"),sep="-")
   #missing a few here
@@ -2286,13 +2287,9 @@ generateReferences <- function(genomeObject,genomeText="hg38",tileWidth=1e6,outp
   cpg_densities<-sort.GenomicRanges(append(GRanges(b1t2),empties))
   #TODO: fill with missing zeros
   
-  #REMOVE GARBAGE CHROMOSOMES
-  cpg_densities<-keepStandardChromosomes(cpg_densities,pruning.mode = "tidy")
-  cytoband_densities<-keepStandardChromosomes(a3,pruning.mode="tidy")
-  sort.GenomicRanges(cytoband_densities)
-  
+  print(cpg_densities)
   write.table(as_tibble(sort.GenomicRanges(cpg_densities))[,c(1:3,6)],str_c(fileSuffixes,"_cpg_densities.tsv",sep=""),quote=FALSE,sep="\t",col.names = FALSE,row.names=FALSE)
-  write.table(as_tibble(sort.GenomicRanges(cytoband_densities))[,c(1:3,6)],str_c(fileSuffixes,"_cytoband_densities_granges.tsv",sep=""),quote=FALSE,sep="\t",col.names = FALSE,row.names=FALSE)
+  write.table(as_tibble(a3)[,c(1:3,6)],str_c(fileSuffixes,"_cytoband_densities_granges.tsv",sep=""),quote=FALSE,sep="\t",col.names = FALSE,row.names=FALSE)
   write.table(as_tibble(chrom_sizes),str_c(outputDir,"/",genomeText,"_chrom_sizes.tsv",sep=""),quote=FALSE,sep="\t",col.names = FALSE,row.names=FALSE)
 }
 #' identifyNonNeoplastic
