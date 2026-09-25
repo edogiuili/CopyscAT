@@ -87,6 +87,47 @@ setOutputFile(".", "samp_dataset")
 `cellSuffix` must match the barcode suffix in your matrix, otherwise the
 column selection throughout the pipeline silently matches nothing.
 
+## Checking depth before you start
+
+Sequencing depth drives most of the parameter choices below, so it is worth
+looking at it before committing to thresholds — especially when several
+samples will be analysed together.
+
+```{r}
+depth <- signalPerCell(c(
+  tumour1 = "tumour1_matrix.tsv",
+  tumour2 = "tumour2_matrix.tsv"
+))
+
+summariseCellDepth(depth)
+plotCellDistribution(depth, cutoff = 1e6)
+plotCellKnee(depth)
+```
+
+`plotCellDistribution()` draws one histogram per sample on a log scale. A
+bimodal shape is expected: the left mode is ambient or empty barcodes, the
+right mode real cells. `plotCellKnee()` overlays the samples as ranked curves,
+whose elbow marks the transition between the two. A sample whose curve sits
+well below the others is shallower and may need its own `minFrags` and
+`blacklistCutoff`.
+
+Note the units. `process_fragment_file.py` accumulates fragment *lengths*, so
+the row sum of a CopyscAT matrix is the number of base pairs a cell covers,
+not the number of fragments — which is why the column is called `signal_bp`.
+For fragment counts, read the source files instead:
+
+```{r}
+frags <- fragmentsPerCell(c(tumour1 = "tumour1/fragments.tsv.gz"))
+
+# Or, much faster, from CellRanger output:
+frags <- fragmentsPerCell(c(tumour1 = "tumour1/singlecell.csv"))
+
+plotCellDistribution(frags, cutoff = 1e4)
+```
+
+These counts are directly comparable with the `minFrags` argument of
+`initialiseEnvironment()` and the `-f` option of `process_fragment_file.py`.
+
 ## Normalisation and quality control
 
 ```{r}

@@ -90,6 +90,32 @@ Run `python3 process_fragment_file.py --help` for the full parameter list.
 Prebuilt 1 Mb reference files for hg19 and hg38 are included in
 `hg19_references/` and `hg38_references/`.
 
+## Checking sequencing depth
+
+Depth drives most of the parameter choices, so inspect it before setting
+thresholds — particularly when comparing several samples:
+
+```r
+depth <- signalPerCell(c(tumour1 = "t1_matrix.tsv", tumour2 = "t2_matrix.tsv"))
+
+summariseCellDepth(depth)             # per-sample quartiles
+plotCellDistribution(depth, cutoff = 1e6)   # histograms, one panel per sample
+plotCellKnee(depth)                   # ranked barcode curves
+```
+
+`signalPerCell()` reports **base pairs**, not fragments:
+`process_fragment_file.py` sums fragment lengths, so a matrix row sum is the
+genomic span a cell covers. For fragment counts, read the source files:
+
+```r
+frags <- fragmentsPerCell(c(tumour1 = "tumour1/fragments.tsv.gz"))
+# or, much faster, from CellRanger:
+frags <- fragmentsPerCell(c(tumour1 = "tumour1/singlecell.csv"))
+```
+
+These are directly comparable with `minFrags` and the `-f` option of
+`process_fragment_file.py`.
+
 ## Notes on parameters
 
 - `cellSuffix` must match the barcode suffix in your matrix (`-1`, `-2`, …).
@@ -98,6 +124,9 @@ Prebuilt 1 Mb reference files for hg19 and hg38 are included in
 - `subsetSize` in `identifyCNVClusters()` is clamped to the available cell
   count, with a warning.
 - `identifyNonNeoplastic()` works best below about 90% tumour cellularity.
+- `maxZero` caps how many low-signal bins a cell may have, so a value above
+  your bin count disables the filter and lets empty barcodes through to
+  `edgeR::cpm()`.
 
 ## Development
 
