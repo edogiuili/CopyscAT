@@ -11,13 +11,18 @@ Identifies large-scale and focal copy number alterations from single-cell ATAC s
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/spcdot/CopyscAT}
-  \item Report bugs at \url{https://github.com/spcdot/CopyscAT/issues}
+  \item \url{https://github.com/edogiuili/CopyscAT}
+  \item Report bugs at \url{https://github.com/edogiuili/CopyscAT/issues}
 }
 
 }
 \author{
 \strong{Maintainer}: Ana Nikolic \email{nikolica@ucalgary.ca}
+
+Other contributors:
+\itemize{
+  \item Edoardo Giuili \email{edoardo.giuili@ugent.be} [contributor]
+}
 
 }
 \keyword{internal}

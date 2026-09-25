@@ -3,7 +3,9 @@ Title: Copy Number Variant Inference from Single-Cell ATAC Sequencing
 Version: 1.0.0
 Authors@R: c(
     person("Ana", "Nikolic", email = "nikolica@ucalgary.ca",
-           role = c("aut", "cre"))
+           role = c("aut", "cre")),
+    person("Edoardo", "Giuili", email = "edoardo.giuili@ugent.be",
+           role = "ctb")
   )
 Description: Identifies large-scale and focal copy number alterations from
     single-cell ATAC sequencing data without requiring a matched normal
@@ -52,8 +54,8 @@ Suggests:
     S4Vectors,
     testthat (>= 3.0.0),
     withr
-URL: https://github.com/spcdot/CopyscAT
-BugReports: https://github.com/spcdot/CopyscAT/issues
+URL: https://github.com/edogiuili/CopyscAT
+BugReports: https://github.com/edogiuili/CopyscAT/issues
 biocViews: Software, CopyNumberVariation, SingleCell, ATACSeq, Sequencing
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
