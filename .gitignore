@@ -1,0 +1,60 @@
+# R session / history artifacts
+.Rhistory
+.Rapp.history
+.RData
+.Rdata
+*.Rdata
+.Ruserdata
+.Renviron
+
+# RStudio / IDE
+.Rproj.user/
+*.Rproj
+.vscode/
+.idea/
+
+# R build artifacts
+*.tar.gz
+*.Rcheck/
+..Rcheck/
+/src/*.o
+/src/*.so
+/src/*.dll
+/*.Rout
+.httr-oauth
+
+# pkgdown / docs output
+docs/
+/doc/
+/Meta/
+inst/doc/
+
+# testthat / covr
+tests/testthat/_snaps/*.new.md
+lib-cov/
+*.gcov
+*.gcda
+*.gcno
+
+# Generated analysis outputs (CopyscAT writes PDFs/CSVs next to the working dir)
+*_cnv.csv
+*_cnv_scores.csv
+*_cnv_anno_binary.csv
+*_loss_annotations.csv
+*_stats.tsv
+*_graph.pdf
+*_LOH.pdf
+*_cnv_summary*.pdf
+*_nmf_heatmap.pdf
+*_nmf_violinplot.pdf
+*_segment_scatterplots.pdf
+*_signal_distribution.pdf
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Superseded copies kept on disk but no longer tracked (see MIGRATION notes)
+/cnv_caller_functions_packaged.R
+/scDataSampClusters.Rdata
+/data/scDataSamp.RData

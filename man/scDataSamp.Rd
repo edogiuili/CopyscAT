@@ -3,17 +3,24 @@
 \docType{data}
 \name{scDataSamp}
 \alias{scDataSamp}
-\title{Sample processed matrix for testing}
+\title{Example processed fragment matrix}
 \format{
-data.frame with 3103 columns and 1371 rows
+A data frame with 1371 rows (cells) and 3103 columns (1 Mb genomic
+bins). Row names are cell barcodes; column names are \code{chrom_position}.
 }
 \source{
-1371 adult GBM cells
+Adult glioblastoma single-cell ATAC sequencing.
 }
 \usage{
 scDataSamp
 }
 \description{
-Sample processed matrix for testing
+Binned ATAC fragment counts for 1371 adult glioblastoma cells, in the format
+produced by \code{process_fragment_file.py}. Used by the examples and tests.
 }
+\seealso{
+Other example data: 
+\code{\link{scDataSampClusters}}
+}
+\concept{example data}
 \keyword{datasets}
