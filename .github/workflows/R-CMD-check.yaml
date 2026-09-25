@@ -54,4 +54,6 @@ jobs:
         with:
           upload-snapshots: true
           args: 'c("--no-manual", "--as-cran")'
-          build_args: 'c("--no-manual", "--no-build-vignettes")'
+          # Vignettes must be built here: --as-cran expects inst/doc to exist,
+          # and --no-build-vignettes would leave it out.
+          build_args: 'c("--no-manual")'

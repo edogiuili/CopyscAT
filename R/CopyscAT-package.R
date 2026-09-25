@@ -32,16 +32,16 @@ NULL
 # Quiet R CMD check notes about columns referenced via non-standard evaluation
 # inside dplyr/data.table pipelines.
 utils::globalVariables(c(
-  ".", ".SD", "Average", "Barcode", "Cell", "Cell_id", "Cells", "Chrom",
-  "Density", "Diff", "Loc", "Mean", "Point", "Pos", "V1", "V2", "V4",
-  "alteration", "arm", "barcode", "blacklist", "chrom", "chromArm",
-  "chromMatch", "clust", "clust_diff", "clust_text", "cluster", "cpg",
-  "cpgNum", "count",
-  "counts", "end", "genes", "hgnc_symbol", "init", "init2", "interval",
-  "keeper", "loc1", "maxClust", "mean", "min", "name", "neoplastic",
-  "neoplasticFALSE", "neoplasticTRUE", "normCluster", "num", "pos", "pos_b",
-  "ratio", "raw_medians", "rowname", "segment", "start", "tiles.end",
-  "tiles.start", "transcript_length", "value", "var", "zoffset", "zscore"
-,
-  "..chromXName", "..chromYName", "..zero_list", "Alteration", "Clust", "Start", "Value", "cellName", "endCoord", "medianNorm", "startChrom", "startCoord", "touching", "V3", "V5", "dm", "newIndex"
+  ".", "..chromXName", "..chromYName", "..zero_list", ".SD", "1", "2",
+  "Alteration", "alteration", "arm", "Average", "Barcode", "barcode",
+  "blacklist", "Cell", "Cell_id", "cellName", "Cells", "Chrom", "chrom",
+  "chromArm", "chromMatch", "clust", "Clust", "clust_diff", "clust_text",
+  "cluster", "count", "counts", "cpg", "cpgNum", "Density", "Diff", "dm",
+  "end", "endCoord", "genes", "hgnc_symbol", "init", "init2", "interval",
+  "keeper", "Loc", "loc1", "maxClust", "Mean", "mean", "medianNorm", "min",
+  "name", "neoplastic", "neoplasticFALSE", "neoplasticTRUE", "newIndex",
+  "normCluster", "num", "Point", "Pos", "pos", "pos_b", "ratio",
+  "raw_medians", "rowname", "segment", "Start", "start", "startChrom",
+  "startCoord", "tiles.end", "tiles.start", "touching", "transcript_length",
+  "V1", "V2", "V3", "V4", "V5", "value", "Value", "var", "zoffset", "zscore"
 ))
