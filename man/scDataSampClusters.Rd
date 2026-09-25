@@ -3,17 +3,24 @@
 \docType{data}
 \name{scDataSampClusters}
 \alias{scDataSampClusters}
-\title{Sample processed cluster data frame for testing}
+\title{Example cluster assignments}
 \format{
-data.frame
+A data frame with one row per barcode: the barcode in the first
+column and its cluster label in the second.
 }
 \source{
-adult GBM cells
+Adult glioblastoma single-cell ATAC sequencing.
 }
 \usage{
 scDataSampClusters
 }
 \description{
-Sample processed cluster data frame for testing
+Cluster labels for the cells in \link{scDataSamp}, as consumed by
+\code{\link[=smoothClusters]{smoothClusters()}}.
 }
+\seealso{
+Other example data: 
+\code{\link{scDataSamp}}
+}
+\concept{example data}
 \keyword{datasets}

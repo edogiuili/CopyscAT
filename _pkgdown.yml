@@ -1,0 +1,90 @@
+url: https://edogiuili.github.io/CopyscAT/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#2c5f7c"
+
+navbar:
+  structure:
+    left:  [intro, reference, articles]
+    right: [search, github]
+
+reference:
+  - title: Session setup
+    desc: >
+      Build reference files and load them into the session. Run these before
+      any analysis step.
+    contents:
+      - has_concept("session setup")
+
+  - title: Data import
+    desc: Read a preprocessed fragment matrix.
+    contents:
+      - has_concept("data import")
+
+  - title: Normalisation
+    desc: >
+      Normalise raw counts, correct for CpG density and collapse binned signal
+      to chromosome arms.
+    contents:
+      - has_concept("normalisation")
+
+  - title: Quality control
+    desc: Remove low-coverage cells and likely doublets.
+    contents:
+      - has_concept("quality control")
+
+  - title: Summarisation
+    desc: >
+      Summary functions used to reduce per-bin signal to a single value, and
+      helpers for merging bins.
+    contents:
+      - has_concept("summarisation")
+
+  - title: CNV calling
+    desc: >
+      Decompose per-arm signal into copy number states and clean up the
+      resulting clusters.
+    contents:
+      - has_concept("CNV calling")
+
+  - title: CNV annotation
+    desc: Convert cluster assignments into copy number estimates.
+    contents:
+      - has_concept("CNV annotation")
+
+  - title: Focal amplifications
+    desc: Detect double minutes and other focal amplifications.
+    contents:
+      - has_concept("focal amplification")
+
+  - title: Loss of heterozygosity
+    desc: Call LOH regions and annotate them with overlapping genes.
+    contents:
+      - has_concept("LOH")
+
+  - title: Neoplastic classification
+    desc: Separate tumour from normal cells and estimate cycling fraction.
+    contents:
+      - has_concept("neoplastic classification")
+
+  - title: Reporting
+    desc: Plots and summary statistics.
+    contents:
+      - has_concept("reporting")
+
+  - title: Example data
+    contents:
+      - has_concept("example data")
+
+  - title: Session state
+    contents:
+      - scCNVCaller
+      - CopyscAT-package
+
+articles:
+  - title: Getting started
+    navbar: ~
+    contents:
+      - copyscat

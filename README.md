@@ -1,29 +1,119 @@
 # CopyscAT
-Copy number variant inference with single-cell ATAC seq
 
-INTRODUCTION
-CopyscAT is designed to identify large-scale and local alterations in chromosomes without need for a control file. It is currently in early beta - documentation and testing are still works in progress. Development is ongoing with R 4.0.0, so please install within an R 4.0.0 environment.
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/edogiuili/CopyscAT/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/edogiuili/CopyscAT/actions/workflows/R-CMD-check.yaml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+<!-- badges: end -->
 
-Update (Mar 2021):
-Now with semi-automated neoplastic vs non-neoplastic cell distinction and baseline correction (check tutorial for more details)
+Copy number variant inference from single-cell ATAC sequencing, without a
+matched normal control.
 
-INSTALLATION INSTRUCTIONS
-To install, please download copyscat_tutorial.R and follow the instructions within.
-To generate fragment matrices, use the process_fragment_file.py script (type python3 process_fragment_file.py for details regarding input parameters)
+CopyscAT bins fragment counts across the genome, corrects the chromatin
+accessibility bias using CpG density, and decomposes the per-chromosome-arm
+signal with Gaussian mixture models to assign copy number states to individual
+cells. It also detects double minutes and other focal amplifications by
+changepoint analysis, calls regions of loss of heterozygosity, and separates
+neoplastic from non-neoplastic cells by non-negative matrix factorisation.
 
-------------
+This is a fork of [spcdot/CopyscAT](https://github.com/spcdot/CopyscAT).
 
-Copyright (C) 2020 University of Calgary
+## Installation
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+```r
+# install.packages("remotes")
+remotes::install_github("edogiuili/CopyscAT")
+```
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+Several dependencies come from Bioconductor and are best installed first:
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+```r
+# install.packages("BiocManager")
+BiocManager::install(c("edgeR", "biomaRt", "rtracklayer", "GenomicRanges"))
+```
+
+`generateReferences()` additionally needs a `BSgenome` package for your genome,
+for example `BSgenome.Hsapiens.UCSC.hg38`.
+
+## Quick start
+
+```r
+library(CopyscAT)
+
+# Once per genome build and bin size.
+library(BSgenome.Hsapiens.UCSC.hg38)
+generateReferences(BSgenome.Hsapiens.UCSC.hg38, genomeText = "hg38",
+                   tileWidth = 1e6, outputDir = ".")
+
+# Once per R session.
+initialiseEnvironment(
+  genomeFile   = "hg38_chrom_sizes.tsv",
+  cytobandFile = "hg38_1e+06_cytoband_densities_granges.tsv",
+  cpgFile      = "hg38_1e+06_cpg_densities.tsv",
+  binSize      = 1e6,
+  minFrags     = 1e4,
+  cellSuffix   = c("-1")
+)
+setOutputFile(".", "samp_dataset")
+
+# Normalise, collapse to chromosome arms, filter.
+scData          <- readInputTable("sample_matrix.tsv")
+scData_k_norm   <- normalizeMatrixN(scData, blacklistCutoff = 125,
+                                    dividingFactor = 1)
+scData_collapse <- collapseChrom3N(scData_k_norm, minimumChromValue = 100,
+                                   tssEnrich = 1, minCPG = 300)
+scData_collapse <- filterCells(scData_collapse, minimumSegments = 40,
+                               minDensity = 0.1)
+
+# Call CNVs.
+median_iqr           <- computeCenters(scData_collapse)
+candidate_cnvs       <- identifyCNVClusters(scData_collapse, median_iqr)
+candidate_cnvs_clean <- clusterCNV(candidate_cnvs, candidate_cnvs[[3]],
+                                   minDiff = 1.5)
+final_cnv_list       <- annotateCNV4(candidate_cnvs_clean, saveOutput = TRUE,
+                                     outputSuffix = "clean_cnv")
+```
+
+See `vignette("copyscat")` for the full workflow, including focal
+amplifications, LOH, and using inferred normal cells as the baseline.
+
+## Preparing input matrices
+
+Fragment matrices are generated from a `fragments.tsv.gz` file:
+
+```sh
+python3 process_fragment_file.py -i fragments.tsv.gz -o sample_matrix.tsv \
+    -b 1000000 -f 1000 -g hg38_chrom_sizes.tsv
+```
+
+Run `python3 process_fragment_file.py --help` for the full parameter list.
+
+Prebuilt 1 Mb reference files for hg19 and hg38 are included in
+`hg19_references/` and `hg38_references/`.
+
+## Notes on parameters
+
+- `cellSuffix` must match the barcode suffix in your matrix (`-1`, `-2`, …).
+  If it does not, column selection silently matches nothing.
+- `binSize` must match the `tileWidth` used to build the reference files.
+- `subsetSize` in `identifyCNVClusters()` is clamped to the available cell
+  count, with a warning.
+- `identifyNonNeoplastic()` works best below about 90% tumour cellularity.
+
+## Development
+
+```r
+devtools::load_all(".")   # load without installing
+devtools::test()          # run the test suite
+devtools::document()      # regenerate NAMESPACE and man/
+devtools::check()         # full R CMD check
+```
+
+## Citation
+
+Nikolic A, et al. *Copy-scAT: Deconvoluting single-cell chromatin
+accessibility of genetic subclones in cancer.* Science Advances (2021).
+<https://doi.org/10.1126/sciadv.abg6045>
+
+## License
+
+GPL-3. Copyright (C) 2020 University of Calgary.
