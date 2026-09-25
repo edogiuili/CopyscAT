@@ -121,6 +121,23 @@
 <p>Prebuilt 1 Mb reference files for hg19 and hg38 are included in <code>hg19_references/</code> and <code>hg38_references/</code>.</p>
 </div>
 <div class="section level2">
+<h2 id="checking-sequencing-depth">Checking sequencing depth<a class="anchor" aria-label="anchor" href="#checking-sequencing-depth"></a>
+</h2>
+<p>Depth drives most of the parameter choices, so inspect it before setting thresholds — particularly when comparing several samples:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">depth</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/signalPerCell.html">signalPerCell</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>tumour1 <span class="op">=</span> <span class="st">"t1_matrix.tsv"</span>, tumour2 <span class="op">=</span> <span class="st">"t2_matrix.tsv"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/summariseCellDepth.html">summariseCellDepth</a></span><span class="op">(</span><span class="va">depth</span><span class="op">)</span>             <span class="co"># per-sample quartiles</span></span>
+<span><span class="fu"><a href="reference/plotCellDistribution.html">plotCellDistribution</a></span><span class="op">(</span><span class="va">depth</span>, cutoff <span class="op">=</span> <span class="fl">1e6</span><span class="op">)</span>   <span class="co"># histograms, one panel per sample</span></span>
+<span><span class="fu"><a href="reference/plotCellKnee.html">plotCellKnee</a></span><span class="op">(</span><span class="va">depth</span><span class="op">)</span>                   <span class="co"># ranked barcode curves</span></span></code></pre></div>
+<p><code><a href="reference/signalPerCell.html">signalPerCell()</a></code> reports <strong>base pairs</strong>, not fragments: <code>process_fragment_file.py</code> sums fragment lengths, so a matrix row sum is the genomic span a cell covers. For fragment counts, read the source files:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">frags</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fragmentsPerCell.html">fragmentsPerCell</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>tumour1 <span class="op">=</span> <span class="st">"tumour1/fragments.tsv.gz"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># or, much faster, from CellRanger:</span></span>
+<span><span class="va">frags</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fragmentsPerCell.html">fragmentsPerCell</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>tumour1 <span class="op">=</span> <span class="st">"tumour1/singlecell.csv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>These are directly comparable with <code>minFrags</code> and the <code>-f</code> option of <code>process_fragment_file.py</code>.</p>
+</div>
+<div class="section level2">
 <h2 id="notes-on-parameters">Notes on parameters<a class="anchor" aria-label="anchor" href="#notes-on-parameters"></a>
 </h2>
 <ul>
@@ -132,12 +149,14 @@
 <code>subsetSize</code> in <code><a href="reference/identifyCNVClusters.html">identifyCNVClusters()</a></code> is clamped to the available cell count, with a warning.</li>
 <li>
 <code><a href="reference/identifyNonNeoplastic.html">identifyNonNeoplastic()</a></code> works best below about 90% tumour cellularity.</li>
+<li>
+<code>maxZero</code> caps how many low-signal bins a cell may have, so a value above your bin count disables the filter and lets empty barcodes through to <code><a href="https://rdrr.io/pkg/edgeR/man/cpm.html" class="external-link">edgeR::cpm()</a></code>.</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="development">Development<a class="anchor" aria-label="anchor" href="#development"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">load_all</span><span class="op">(</span><span class="st">"."</span><span class="op">)</span>   <span class="co"># load without installing</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span><span class="op">)</span>          <span class="co"># run the test suite</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">document</span><span class="op">(</span><span class="op">)</span>      <span class="co"># regenerate NAMESPACE and man/</span></span>
