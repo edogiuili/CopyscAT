@@ -35,6 +35,13 @@ reference:
     contents:
       - has_concept("quality control")
 
+  - title: Summarisation
+    desc: >
+      Summary functions used to reduce per-bin signal to a single value, and
+      helpers for merging bins.
+    contents:
+      - has_concept("summarisation")
+
   - title: CNV calling
     desc: >
       Decompose per-arm signal into copy number states and clean up the
