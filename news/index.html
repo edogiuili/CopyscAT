@@ -44,6 +44,22 @@
 <li>
 <code><a href="../reference/saveSummaryStats.html">saveSummaryStats()</a></code> reports accurate cell counts. On the verification run v0.40 reported <code>finalFilterCells = 148</code> and <code>startingCellCount = 0</code> where the true values were 147 and 150. Both versions produced the same 147-cell matrix; only the reported numbers were wrong.</li>
 </ul><div class="section level3">
+<h3 id="new-features-1-0-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-0-0"></a></h3>
+<ul><li>Added five functions for inspecting per-cell sequencing depth before running the CNV workflow:
+<ul><li>
+<code><a href="../reference/signalPerCell.html">signalPerCell()</a></code> summarises the signal each barcode carries, from matrix files or in-memory data frames, across any number of samples.</li>
+<li>
+<code><a href="../reference/fragmentsPerCell.html">fragmentsPerCell()</a></code> counts fragments per barcode from a 10x <code>fragments.tsv.gz</code> or a CellRanger <code>singlecell.csv</code>.</li>
+<li>
+<code><a href="../reference/summariseCellDepth.html">summariseCellDepth()</a></code> returns per-sample quartiles.</li>
+<li>
+<code><a href="../reference/plotCellDistribution.html">plotCellDistribution()</a></code> draws faceted log-scale histograms, with an optional line at a proposed cutoff.</li>
+<li>
+<code><a href="../reference/plotCellKnee.html">plotCellKnee()</a></code> draws ranked barcode curves, whose elbow marks the transition from cells to background.</li>
+</ul>
+Note that <code><a href="../reference/signalPerCell.html">signalPerCell()</a></code> reports base pairs, not fragments: <code>process_fragment_file.py</code> accumulates fragment <em>lengths</em>, so the row sum of a CopyscAT matrix is the genomic span a cell covers. The two functions therefore return differently named columns, <code>signal_bp</code> and <code>n_fragments</code>, and the plotting functions use whichever is present.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="package-structure-1-0-0">Package structure<a class="anchor" aria-label="anchor" href="#package-structure-1-0-0"></a></h3>
 <ul><li>Split the single 2504-line <code>cnv_caller_functions_packaged.R</code> into topical files (<code>setup.R</code>, <code>normalize.R</code>, <code>collapse.R</code>, <code>cluster.R</code>, <code>annotate.R</code>, <code>loh.R</code>, and others).</li>
 <li>Moved 23 packages from <code>Depends</code> to <code>Imports</code>, so loading CopyscAT no longer attaches them to the user’s search path. <code>NAMESPACE</code> now declares explicit imports instead of relying on attachment.</li>
@@ -76,6 +92,10 @@
 <li>
 <code><a href="../reference/normalizeMatrixN.html">normalizeMatrixN()</a></code> split bin names with an unanchored <code>separate()</code>, which truncated coordinates containing extra separators.</li>
 <li>PDF devices are now closed with <code><a href="https://rdrr.io/r/base/on.exit.html" class="external-link">on.exit()</a></code>, so an error mid-analysis no longer leaves a device open and the file truncated.</li>
+<li>
+<code><a href="../reference/annotateCNV4B.html">annotateCNV4B()</a></code> failed with “<code>condition</code> must be a logical vector, not a logical matrix” on current dplyr. <code><a href="https://rdrr.io/r/base/t.html" class="external-link">t()</a></code> on the one-row normal-cluster frame returns an n-by-1 matrix; older dplyr collapsed it inside <code>mutate()</code>, newer versions do not. The value is now converted with <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector()</a></code>, and a guard reports a mismatch between the number of cluster indices and chromosome arms.</li>
+<li>
+<code><a href="../reference/normalizeMatrixN.html">normalizeMatrixN()</a></code> let a barcode with no signal reach <code><a href="https://rdrr.io/pkg/edgeR/man/cpm.html" class="external-link">edgeR::cpm()</a></code>, which rejected it with “library sizes should be greater than zero” — naming neither the barcode nor the parameter at fault. This happens whenever <code>maxZero</code> is at or above the bin count, which disables the empty-bin filter. The new check lists the affected barcodes, the retained and blacklisted bin counts, whether the filter is disabled, and the three ways to resolve it.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="error-handling-1-0-0">Error handling<a class="anchor" aria-label="anchor" href="#error-handling-1-0-0"></a></h3>
@@ -91,7 +111,7 @@
 <ul><li>Rewrote all roxygen documentation: every parameter documented, <code>@return</code> sections added, functions grouped into families for the reference index.</li>
 <li>Added a <code>copyscat</code> vignette covering the full workflow.</li>
 <li>Added a pkgdown site configuration and a rewritten README.</li>
-<li>Added a testthat suite of 77 tests, including end-to-end integration tests that verify a simulated copy number gain is recovered by the pipeline.</li>
+<li>Added a testthat suite of 122 tests, including end-to-end integration tests that verify a simulated copy number gain is recovered by the pipeline.</li>
 <li>Added GitHub Actions for R CMD check (Linux/macOS/Windows), test coverage, linting and pkgdown deployment.</li>
 <li>
 <code><a href="../reference/identifyCNVClusters.html">identifyCNVClusters()</a></code> gained a <code>verbose</code> argument; per-arm mixture summaries are no longer printed unconditionally.</li>

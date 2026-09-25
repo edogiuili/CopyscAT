@@ -18,6 +18,7 @@
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/cutAverage.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/estimateCellCycleFraction.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/filterCells.html</loc></url>
+<url><loc>https://edogiuili.github.io/CopyscAT/reference/fragmentsPerCell.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/generateReferences.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/getAlteredSegments.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/getDoubleMinutes.html</loc></url>
@@ -31,6 +32,8 @@
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/initializeStandards.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/makeFakeCells.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/normalizeMatrixN.html</loc></url>
+<url><loc>https://edogiuili.github.io/CopyscAT/reference/plotCellDistribution.html</loc></url>
+<url><loc>https://edogiuili.github.io/CopyscAT/reference/plotCellKnee.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/readInputTable.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/saveSummaryStats.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/scCNVCaller.html</loc></url>
@@ -39,7 +42,9 @@
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/scaleMatrix.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/scaleMatrixBins.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/setOutputFile.html</loc></url>
+<url><loc>https://edogiuili.github.io/CopyscAT/reference/signalPerCell.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/smoothClusters.html</loc></url>
+<url><loc>https://edogiuili.github.io/CopyscAT/reference/summariseCellDepth.html</loc></url>
 <url><loc>https://edogiuili.github.io/CopyscAT/reference/testOverlap.html</loc></url>
 </urlset>
 

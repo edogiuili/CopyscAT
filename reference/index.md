@@ -37,10 +37,21 @@ to chromosome arms.
 
 ## Quality control
 
-Remove low-coverage cells and likely doublets.
+Inspect per-cell sequencing depth across samples, and remove
+low-coverage cells and likely doublets.
 
 - [`filterCells()`](https://edogiuili.github.io/CopyscAT/reference/filterCells.md)
   : Filter low-quality cells
+- [`fragmentsPerCell()`](https://edogiuili.github.io/CopyscAT/reference/fragmentsPerCell.md)
+  : Fragment counts per cell from fragment files
+- [`plotCellDistribution()`](https://edogiuili.github.io/CopyscAT/reference/plotCellDistribution.md)
+  : Plot the per-cell depth distribution
+- [`plotCellKnee()`](https://edogiuili.github.io/CopyscAT/reference/plotCellKnee.md)
+  : Plot ranked per-cell depth as a knee plot
+- [`signalPerCell()`](https://edogiuili.github.io/CopyscAT/reference/signalPerCell.md)
+  : Per-cell signal from one or more CopyscAT matrices
+- [`summariseCellDepth()`](https://edogiuili.github.io/CopyscAT/reference/summariseCellDepth.md)
+  : Summarise per-cell depth by sample
 
 ## Summarisation
 

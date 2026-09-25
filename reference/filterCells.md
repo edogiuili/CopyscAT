@@ -35,6 +35,15 @@ filterCells(inputMatrix, minimumSegments = 40, minDensity = 0, signalSDcut = 2)
 
 The input matrix with failing cell columns removed.
 
+## See also
+
+Other quality control:
+[`fragmentsPerCell()`](https://edogiuili.github.io/CopyscAT/reference/fragmentsPerCell.md),
+[`plotCellDistribution()`](https://edogiuili.github.io/CopyscAT/reference/plotCellDistribution.md),
+[`plotCellKnee()`](https://edogiuili.github.io/CopyscAT/reference/plotCellKnee.md),
+[`signalPerCell()`](https://edogiuili.github.io/CopyscAT/reference/signalPerCell.md),
+[`summariseCellDepth()`](https://edogiuili.github.io/CopyscAT/reference/summariseCellDepth.md)
+
 ## Examples
 
 ``` r
