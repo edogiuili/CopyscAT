@@ -120,3 +120,98 @@ test_that("getAlteredSegments rejects a malformed clusterResults argument", {
     "identifyNonNeoplastic"
   )
 })
+
+test_that("normalizeMatrixN names empty barcodes instead of failing inside cpm()", {
+  refs <- make_test_references(chroms = paste0("chr", 1:4), binsPerChrom = 20L)
+  session <- local_copyscat_session(refs)
+
+  counts <- simulate_counts(refs, nCells = 40L, baseCount = 400)
+  counts["DEADCELL-1", ] <- 0
+
+  # maxZero at or above the bin count disables the empty-bin filter, so the
+  # barcode reaches edgeR::cpm(), whose own message ("library sizes should be
+  # greater than zero") names neither the cell nor the parameter to change.
+  err <- tryCatch(
+    normalizeMatrixN(counts, maxZero = 10000, blacklistProp = 0.9,
+                     blacklistCutoff = 125, dividingFactor = 1,
+                     upperFilterQuantile = 0.9),
+    error = conditionMessage
+  )
+
+  expect_match(err, "DEADCELL-1", fixed = TRUE)
+  expect_match(err, "maxZero", fixed = TRUE)
+  expect_match(err, "filter is disabled", fixed = TRUE)
+  expect_false(grepl("library sizes should be greater than zero", err,
+                     fixed = TRUE))
+})
+
+test_that("an active empty-bin filter drops zero-signal barcodes silently", {
+  refs <- make_test_references(chroms = paste0("chr", 1:4), binsPerChrom = 20L)
+  session <- local_copyscat_session(refs)
+
+  counts <- simulate_counts(refs, nCells = 40L, baseCount = 400)
+  counts["DEADCELL-1", ] <- 0
+
+  # maxZero below the bin count keeps the filter working, so normalisation
+  # completes and the empty barcode is simply absent from the result.
+  norm <- normalizeMatrixN(counts, maxZero = 70, blacklistProp = 0.9,
+                           blacklistCutoff = 125, dividingFactor = 1,
+                           upperFilterQuantile = 0.9)
+  expect_false("DEADCELL-1" %in% colnames(norm))
+})
+
+test_that("annotateCNV4B collapses the normal-cluster index to a vector", {
+  # t() on the one-row normal_clusters frame yields an n-by-1 matrix. Older
+  # dplyr coerced it inside mutate(); newer dplyr keeps it a matrix and
+  # if_else() then fails with "`condition` must be a logical vector, not a
+  # logical matrix". Checking the shape of the result keeps this test
+  # independent of the installed dplyr version.
+  session <- local_copyscat_session()
+
+  # clusterCNV() returns Chrom plus V1..V6, which annotateCNV4B relies on when
+  # it maps cluster indices onto factor levels 0..6.
+  arms <- c("chr1p", "chr1q")
+  cnvResults <- list(
+    data.frame(
+      Cells = c("N1-1", "N2-1", "T1-1", "T2-1"),
+      chr1p = c(1, 1, 2, 2),
+      chr1q = c(1, 1, 2, 2),
+      stringsAsFactors = FALSE
+    ),
+    data.frame(
+      Chrom = arms,
+      V1 = c(0.10, 0.20), V2 = c(1.10, 1.20), V3 = c(0, 0),
+      V4 = c(0, 0), V5 = c(0, 0), V6 = c(0, 0),
+      stringsAsFactors = FALSE
+    )
+  )
+
+  res <- annotateCNV4B(cnvResults, expectedNormals = c("N1-1", "N2-1"),
+                       saveOutput = FALSE, filterResults = FALSE)
+
+  expect_length(res, 3L)
+  # zoffset must be a plain numeric vector, one value per arm, not a matrix.
+  zoff <- res[[1]]$zoffset
+  expect_null(dim(zoff))
+  expect_type(zoff, "double")
+})
+
+test_that("annotateCNV4B rejects cluster results of the wrong shape", {
+  session <- local_copyscat_session()
+
+  # Three arms in the cluster means but only two columns of assignments.
+  cnvResults <- list(
+    data.frame(Cells = c("N1-1", "N2-1"), chr1p = c(1, 1), chr1q = c(1, 1),
+               stringsAsFactors = FALSE),
+    data.frame(Chrom = c("chr1p", "chr1q", "chr2p"),
+               V1 = c(0.1, 0.2, 0.3), V2 = c(1.1, 1.2, 1.3),
+               V3 = 0, V4 = 0, V5 = 0, V6 = 0,
+               stringsAsFactors = FALSE)
+  )
+
+  expect_error(
+    annotateCNV4B(cnvResults, expectedNormals = c("N1-1", "N2-1"),
+                  saveOutput = FALSE),
+    "one normal-cluster index per chromosome arm"
+  )
+})

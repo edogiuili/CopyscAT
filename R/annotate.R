@@ -199,7 +199,26 @@ annotateCNV4B <- function(cnvResults,expectedNormals,saveOutput=TRUE,maxClust2=4
   normal_clusters<-cnvResults[[1]] %>% dplyr::filter(Cells %in% expectedNormals) %>% summarise_if(is.numeric,mean) %>% mutate_all(round)
   cell_assignments<-column_to_rownames(cell_assignments,var = "Cells")
   chrom_clusters_final<-cnvResults[[2]]
-  chrom_clusters_final<-chrom_clusters_final %>% mutate(norm=t(normal_clusters)) %>% mutate(zoffset=if_else(norm=="1",V1,V2))
+  # t() on a one-row data frame returns an n-by-1 matrix, not a vector. Older
+  # dplyr silently collapsed that inside mutate(); current versions keep it a
+  # matrix, and if_else() then rejects the logical matrix condition with
+  # "`condition` must be a logical vector, not a logical matrix". as.vector()
+  # makes the intent explicit and works on every dplyr version. The comparison
+  # is numeric rather than against the string "1" for the same reason: the
+  # values are rounded cluster indices.
+  normalClusterIndex <- as.vector(t(normal_clusters))
+  if (length(normalClusterIndex) != nrow(chrom_clusters_final)) {
+    stop(
+      sprintf(
+        paste0("Expected one normal-cluster index per chromosome arm, but got ",
+               "%d for %d arms. This usually means `cnvResults` came from a ",
+               "different run than `expectedNormals`."),
+        length(normalClusterIndex), nrow(chrom_clusters_final)
+      ),
+      call. = FALSE
+    )
+  }
+  chrom_clusters_final<-chrom_clusters_final %>% mutate(norm=normalClusterIndex) %>% mutate(zoffset=if_else(norm==1,V1,V2))
   #no offset for X or Y
   chrom_clusters_final$zoffset[chrom_clusters_final$Chrom %in% c("chrXp","chrXq","chrYp","chrYq")]<-0
   shift_val=0

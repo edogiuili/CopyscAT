@@ -117,6 +117,49 @@ normalizeMatrixN <- function(inputMatrix,logNorm=FALSE,maxZero=2000,imputeZeros=
   {
     tmp3 <- tmp1  # %>% dplyr::select(-raw_medians)
   }
+  # cpm() derives library sizes from column sums and rejects any column that
+  # sums to zero, reporting only "library sizes should be greater than zero"
+  # with no indication of which cell or which parameter is responsible. A
+  # barcode with no signal in the retained bins reaches cpm() whenever
+  # `maxZero` exceeds the bin count, which disables the empty-bin filter.
+  librarySizes <- colSums(tmp3, na.rm = TRUE)
+  emptyCells <- names(librarySizes)[librarySizes <= 0]
+  if (length(emptyCells) > 0L) {
+    shown <- utils::head(emptyCells, 5)
+    filterDisabled <- maxZero >= nrow(tmp3)
+    stop(
+      sprintf(
+        paste0(
+          "%d of %d barcodes have no signal left after filtering, and ",
+          "edgeR::cpm() cannot normalise a cell whose counts sum to zero.\n",
+          "  Affected barcodes: %s%s\n",
+          "  Retained bins: %d   blacklisted: %d of %d\n",
+          "  maxZero = %s%s\n",
+          "To fix, do one of:\n",
+          "  * lower `maxZero` below the bin count (%d) so empty barcodes ",
+          "are filtered out;\n",
+          "  * lower `blacklistCutoff` (currently %s) if too many bins were ",
+          "blacklisted;\n",
+          "  * raise `minFrags` upstream, or drop empty barcodes with ",
+          "inputMatrix[rowSums(inputMatrix) > 0, ]."
+        ),
+        length(emptyCells), length(librarySizes),
+        paste(shown, collapse = ", "),
+        if (length(emptyCells) > length(shown)) {
+          sprintf(" (and %d more)", length(emptyCells) - length(shown))
+        } else "",
+        nrow(tmp3), length(blacklistRegions), nrow(sc_pos),
+        format(maxZero),
+        if (filterDisabled) {
+          sprintf(" -- at or above the bin count (%d), so the empty-bin filter is disabled",
+                  nrow(tmp3))
+        } else "",
+        nrow(tmp3), format(blacklistCutoff)
+      ),
+      call. = FALSE
+    )
+  }
+
   #now normalize quantiles to account for differences in coverage
   scData_n<-cpm(tmp3,log = logNorm,prior.count = priorCount)
   
