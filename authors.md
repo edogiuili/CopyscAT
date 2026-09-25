@@ -9,7 +9,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/edogiuili/CopyscAT/blob/master/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/edogiuili/CopyscAT/blob/1.0.0/DESCRIPTION)
 
 Nikolic A (2026). *CopyscAT: Copy Number Variant Inference from
 Single-Cell ATAC Sequencing*. R package version 1.0.0,
