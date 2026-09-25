@@ -122,7 +122,11 @@ normalizeMatrixN <- function(inputMatrix,logNorm=FALSE,maxZero=2000,imputeZeros=
   # with no indication of which cell or which parameter is responsible. A
   # barcode with no signal in the retained bins reaches cpm() whenever
   # `maxZero` exceeds the bin count, which disables the empty-bin filter.
-  librarySizes <- colSums(tmp3, na.rm = TRUE)
+  # `raw_medians` is a per-bin summary, not a cell. On sparse data the median
+  # of every retained bin can be zero, so it is kept out of the empty-barcode
+  # check and out of cpm(), then re-attached afterwards.
+  cellCols <- setdiff(colnames(tmp3), "raw_medians")
+  librarySizes <- colSums(tmp3[, cellCols, drop = FALSE], na.rm = TRUE)
   emptyCells <- names(librarySizes)[librarySizes <= 0]
   if (length(emptyCells) > 0L) {
     shown <- utils::head(emptyCells, 5)
@@ -161,10 +165,19 @@ normalizeMatrixN <- function(inputMatrix,logNorm=FALSE,maxZero=2000,imputeZeros=
   }
 
   #now normalize quantiles to account for differences in coverage
-  scData_n<-cpm(tmp3,log = logNorm,prior.count = priorCount)
+  scData_n<-cpm(tmp3[, cellCols, drop = FALSE],log = logNorm,prior.count = priorCount)
+  if ("raw_medians" %in% colnames(tmp3)) {
+    # An all-zero median profile cannot be scaled; it is left as zeros.
+    medians <- tmp3$raw_medians
+    if (sum(medians, na.rm = TRUE) > 0) {
+      medians <- cpm(matrix(medians, ncol = 1), log = logNorm,
+                     prior.count = priorCount)[, 1]
+    }
+    scData_n <- cbind(scData_n, raw_medians = medians)
+  }
   
   rownames(scData_n)<-colnames(inputMatrix)
-  colnames(scData_n)<-colnames(tmp3)
+  colnames(scData_n)<-c(cellCols, intersect("raw_medians", colnames(tmp3)))
   scData_nc_split <- rownames_to_column(as.data.frame(scData_n),var = "Loc") %>% mutate(blacklist=(Loc %in% blacklistRegions)) %>% separate(col=Loc,into=c("chrom","pos"),sep="_",extra="merge",fill="right")
   scData_k<- scData_nc_split %>% mutate_at(dplyr::vars(dplyr::ends_with(scCNVCaller$cellSuffix)), list(~ (. / dividingFactor)))
   return(scData_k)
