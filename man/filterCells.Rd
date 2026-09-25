@@ -32,4 +32,12 @@ scData_collapse <- filterCells(
 )
 }
 }
+\seealso{
+Other quality control: 
+\code{\link{fragmentsPerCell}()},
+\code{\link{plotCellDistribution}()},
+\code{\link{plotCellKnee}()},
+\code{\link{signalPerCell}()},
+\code{\link{summariseCellDepth}()}
+}
 \concept{quality control}

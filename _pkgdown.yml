@@ -31,7 +31,9 @@ reference:
       - has_concept("normalisation")
 
   - title: Quality control
-    desc: Remove low-coverage cells and likely doublets.
+    desc: >
+      Inspect per-cell sequencing depth across samples, and remove
+      low-coverage cells and likely doublets.
     contents:
       - has_concept("quality control")
 

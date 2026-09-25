@@ -11,7 +11,8 @@
 #' @importFrom dplyr %>%
 #' @importFrom edgeR cpm
 #' @importFrom ggplot2 aes element_line element_rect element_text facet_wrap
-#'   geom_smooth geom_violin ggplot ggtitle theme xlab
+#'   geom_histogram geom_hline geom_line geom_smooth geom_violin geom_vline
+#'   ggplot ggtitle labs scale_x_log10 scale_y_log10 theme theme_bw xlab
 #' @importFrom gplots heatmap.2
 #' @importFrom grDevices colorRampPalette dev.off pdf
 #' @importFrom graphics abline hist legend plot segments title
@@ -41,7 +42,7 @@ utils::globalVariables(c(
   "keeper", "Loc", "loc1", "maxClust", "Mean", "mean", "medianNorm", "min",
   "name", "neoplastic", "neoplasticFALSE", "neoplasticTRUE", "newIndex",
   "normCluster", "num", "Point", "Pos", "pos", "pos_b", "ratio",
-  "raw_medians", "rowname", "segment", "Start", "start", "startChrom",
+  "rank", "raw_medians", "rowname", "segment", "Start", "start", "startChrom",
   "startCoord", "tiles.end", "tiles.start", "touching", "transcript_length",
   "V1", "V2", "V3", "V4", "V5", "value", "Value", "var", "zoffset", "zscore"
 ))
