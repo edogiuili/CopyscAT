@@ -177,6 +177,15 @@ nmf_results <- identifyNonNeoplastic(
   scData_collapse, methodHclust = "ward.D", cutHeight = 0.4
 )
 
+print(paste("Normal cluster is:", nmf_results$clusterNormal))
+
+write.table(
+  rownames_to_column(data.frame(nmf_results$cellAssigns), var = "Barcode"),
+  file = str_c(scCNVCaller$locPrefix, scCNVCaller$outPrefix,
+               "_nmf_clusters.csv"),
+  quote = FALSE, row.names = FALSE, sep = ","
+)
+
 median_iqr <- computeCenters(
   scData_collapse %>% dplyr::select(chrom, nmf_results$normalBarcodes),
   summaryFunction = cutAverage
@@ -231,9 +240,22 @@ the cost of sensitivity.
 dm_candidates <- identifyDoubleMinutes(
   scData_k_norm, minCells = 100, qualityCutoff2 = 100, minThreshold = 4
 )
+
+write.table(
+  dm_candidates,
+  file = str_c(scCNVCaller$locPrefix, scCNVCaller$outPrefix, "_dm.csv"),
+  quote = FALSE, row.names = FALSE, sep = ","
+)
 ```
 
 It returns `NULL` and reports it when nothing passes the filters.
+
+Byte-compiling the function can shave time off a large run:
+
+```{r}
+dmRead <- compiler::cmpfun(identifyDoubleMinutes)
+dm_candidates <- dmRead(scData_k_norm, minCells = 100, minThreshold = 4)
+```
 
 ## Segmental gains and losses
 
@@ -243,6 +265,12 @@ Requires the normal population from `identifyNonNeoplastic()`.
 altered_segments <- getAlteredSegments(
   scData_k_norm, nmf_results, lossThreshold = 0.6
 )
+
+write.table(
+  altered_segments,
+  file = str_c(scCNVCaller$locPrefix, scCNVCaller$outPrefix, "_segments.csv"),
+  quote = FALSE, row.names = FALSE, sep = ","
+)
 ```
 
 ## Cycling cells
@@ -250,6 +278,14 @@ altered_segments <- getAlteredSegments(
 ```{r}
 barcodeCycling <- estimateCellCycleFraction(
   scData, sampName = "sample", cutoff = 1000
+)
+
+# The largest component is taken as the 2N population.
+write.table(
+  barcodeCycling[order(names(barcodeCycling))] == max(barcodeCycling),
+  file = str_c(scCNVCaller$locPrefix, scCNVCaller$outPrefix,
+               "_cycling_cells.tsv"),
+  sep = "\t", quote = FALSE, row.names = TRUE, col.names = FALSE
 )
 ```
 
